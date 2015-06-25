@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/boltdb/bolt"
 	"github.com/codegangsta/cli"
@@ -11,6 +12,18 @@ import (
 
 // The file to  be used as an object store
 const DBName string = ".got.db"
+
+var CURRENT []byte
+var OBJECTS []byte
+var INFO []byte
+var HEADS []byte
+
+func init() {
+	INFO = []byte("INFO")
+	CURRENT = []byte("CURRENT")
+	HEADS = []byte("HEADS")
+	OBJECTS = []byte("OBJECTS")
+}
 
 // Tries to open the database, printing approproate errors if it doesn't exist,
 // or could not be opened.
@@ -24,6 +37,14 @@ func openDB() *bolt.DB {
 	}
 	log.Fatal(DBName + " does not exist.\n")
 	return nil
+}
+
+// IgnorePath returns true if a file should be ignored
+func IgnorePath(path string) bool {
+	if strings.HasPrefix(path, ".") {
+		return true
+	}
+	return false
 }
 
 func main() {
@@ -42,6 +63,13 @@ func main() {
 					if err != nil {
 						log.Fatal("Could not create " + DBName + "\n")
 					}
+
+					db.Update(func(tx *bolt.Tx) error {
+						tx.CreateBucket(INFO)
+						tx.CreateBucket(OBJECTS)
+						return nil
+					})
+
 					defer db.Close()
 				}
 			},
@@ -52,6 +80,16 @@ func main() {
 			Action: func(c *cli.Context) {
 				db := openDB()
 				defer db.Close()
+
+				// Perform operations in a read-only lock
+				db.View(func(tx *bolt.Tx) error {
+					b := tx.Bucket(INFO)
+					heads := b.Get(HEADS)
+					if heads != nil {
+					}
+					fmt.Println("There are no commits in this repository...")
+					return nil
+				})
 			},
 		},
 		{
@@ -60,16 +98,35 @@ func main() {
 			Action: func(c *cli.Context) {
 				db := openDB()
 				defer db.Close()
+
+				// Perform operations in a read-only lock
+				err := db.View(func(tx *bolt.Tx) error {
+					b := tx.Bucket(INFO)
+					current := b.Get(CURRENT)
+					if current != nil {
+					}
+					return nil
+				})
+				if err != nil {
+					log.Fatal("Error reading from the database.")
+				}
 			},
 		},
 		{
 			Name:  "commit",
 			Usage: "Record changes to the repository.",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "message, m",
+					Usage: "Commit message",
+				},
+				cli.StringFlag{
+					Name:  "author, a",
+					Usage: "Commit author",
+				},
+			},
 			Action: func(c *cli.Context) {
-				db, err := bolt.Open(DBName, 0600, nil)
-				if err != nil {
-					log.Fatal("Could not initialize got.db.\n")
-				}
+				db := openDB()
 				defer db.Close()
 			},
 		},
@@ -77,16 +134,15 @@ func main() {
 			Name:  "checkout",
 			Usage: "Checkout a the working tree to a commit.",
 			Action: func(c *cli.Context) {
+				db := openDB()
+				defer db.Close()
 			},
 		},
 		{
 			Name:  "revert",
 			Usage: "Revert a file to the last commit.",
 			Action: func(c *cli.Context) {
-				db, err := bolt.Open(DBName, 0600, nil)
-				if err != nil {
-					log.Fatal("Could not initialize got.db.\n")
-				}
+				db := openDB()
 				defer db.Close()
 			},
 		},

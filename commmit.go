@@ -9,14 +9,14 @@ type Hash [32]byte
 
 // Commit represents a commit object.
 type Commit struct {
-	author      string    // The author of this commit
-	description string    // The commit description
-	time        time.Time // When the commit was created
-	tree        Hash      // The hash of the tree object associated with this commit
-	parents     []Hash    // The parents of this commit
+	Author  string    // The author of this commit
+	Message string    // The commit message
+	Time    time.Time // When the commit was created
+	Tree    Hash      // The hash of the tree object associated with this commit
+	Parents []Hash    // The parents of this commit
 }
 
 // Tree represents a tree object.
 type Tree struct {
-	files map[string]Hash
+	Files map[string]Hash
 }

@@ -13,10 +13,20 @@ import (
 // The file to  be used as an object store
 const DBName string = ".got.db"
 
-var CURRENT []byte
+// The name of the bucket containing OBJECTS
 var OBJECTS []byte
+
+// The name of the INFO db Bucket
 var INFO []byte
+
+// The key that should always point to the current revision
+// that the working copy is based on.
+var CURRENT []byte
+
+// This key should point to a list of all heads in the repository
 var HEADS []byte
+
+// TODO: Add function that finds root of repository
 
 func init() {
 	INFO = []byte("INFO")
@@ -39,7 +49,7 @@ func openDB() *bolt.DB {
 	return nil
 }
 
-// IgnorePath returns true if a file should be ignored
+// IgnorePath returns true if a file/directory should be ignored
 func IgnorePath(path string) bool {
 	if strings.HasPrefix(path, ".") {
 		return true
@@ -47,6 +57,7 @@ func IgnorePath(path string) bool {
 	return false
 }
 
+// Application entry point
 func main() {
 	app := cli.NewApp()
 	app.Name = "got"
@@ -93,24 +104,9 @@ func main() {
 			},
 		},
 		{
-			Name:  "status",
-			Usage: "Diff the current working directory with the last commit.",
-			Action: func(c *cli.Context) {
-				db := openDB()
-				defer db.Close()
-
-				// Perform operations in a read-only lock
-				err := db.View(func(tx *bolt.Tx) error {
-					b := tx.Bucket(INFO)
-					current := b.Get(CURRENT)
-					if current != nil {
-					}
-					return nil
-				})
-				if err != nil {
-					log.Fatal("Error reading from the database.")
-				}
-			},
+			Name:   "status",
+			Usage:  "Diff the current working directory with the last commit.",
+			Action: Status,
 		},
 		{
 			Name:  "commit",
@@ -125,10 +121,7 @@ func main() {
 					Usage: "Commit author",
 				},
 			},
-			Action: func(c *cli.Context) {
-				db := openDB()
-				defer db.Close()
-			},
+			Action: Commit,
 		},
 		{
 			Name:  "checkout",

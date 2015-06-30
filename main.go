@@ -57,11 +57,20 @@ func IgnorePath(path string) bool {
 	return false
 }
 
+var debug = true
+
+func DebugLog(a string) {
+	if debug {
+		fmt.Println(a)
+	}
+}
+
 // Application entry point
 func main() {
 	app := cli.NewApp()
 	app.Name = "got"
 	app.Usage = "A VCS written in golang."
+
 	app.Commands = []cli.Command{
 		{
 			Name:  "init",

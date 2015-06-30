@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"io/ioutil"
@@ -9,10 +9,12 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/codegangsta/cli"
+	"github.com/rameshvarun/got/types"
+	"github.com/rameshvarun/got/util"
 )
 
 // TakeSnapshot recursivelly snapshots the current directory.
-func TakeSnapshot(b *bolt.Bucket, filePath string) Hash {
+func TakeSnapshot(b *bolt.Bucket, filePath string) types.Hash {
 	// Determine if path is a directory or a file
 	info, err := os.Stat(filePath)
 	if err != nil {
@@ -21,7 +23,7 @@ func TakeSnapshot(b *bolt.Bucket, filePath string) Hash {
 
 	if info.IsDir() {
 		// If the path is a directory, we need to create a tree object
-		treeObject := NewTreeObject()
+		treeObject := types.NewTreeObject()
 
 		// Enumerate all of the files in this directory
 		files, err := ioutil.ReadDir(filePath)
@@ -29,7 +31,7 @@ func TakeSnapshot(b *bolt.Bucket, filePath string) Hash {
 			log.Fatalf("Could not list files in dir %s: %v", filePath, err)
 		}
 		for _, file := range files {
-			if IgnorePath(file.Name()) {
+			if util.IgnorePath(file.Name()) {
 				continue
 			}
 
@@ -40,11 +42,11 @@ func TakeSnapshot(b *bolt.Bucket, filePath string) Hash {
 
 		// Calculate hash of the directory
 		serialized := treeObject.Serialize()
-		hash := CalculateHash(serialized)
+		hash := types.CalculateHash(serialized)
 
 		// Put directory into database, addressed by it's hash
 		b.Put(hash, serialized)
-		DebugLog("Put directory \"" + filePath + "\" into database with hash " + hash.String())
+		util.DebugLog("Put directory \"" + filePath + "\" into database with hash " + hash.String())
 		return hash
 	}
 
@@ -53,17 +55,17 @@ func TakeSnapshot(b *bolt.Bucket, filePath string) Hash {
 	if err != nil {
 		panic(err.Error())
 	}
-	hash := CalculateHash(file)
+	hash := types.CalculateHash(file)
 
 	// Put file into database, addressed by it's hash
 	b.Put(hash, file)
-	DebugLog("Put file \"" + filePath + "\" into database with hash " + hash.String())
+	util.DebugLog("Put file \"" + filePath + "\" into database with hash " + hash.String())
 	return hash
 }
 
 // Commit implements `got commit`
 func Commit(c *cli.Context) {
-	db := openDB()
+	db := util.OpenDB()
 	defer db.Close()
 
 	if len(c.String("message")) == 0 {
@@ -76,21 +78,21 @@ func Commit(c *cli.Context) {
 
 	// Perform operations in a write lock
 	err := db.Update(func(tx *bolt.Tx) error {
-		info := tx.Bucket(INFO)       // The bucket holding repositry metadata
-		objects := tx.Bucket(OBJECTS) // The bucket holding got objects
-		current := info.Get(CURRENT)
+		info := tx.Bucket(util.INFO)       // The bucket holding repositry metadata
+		objects := tx.Bucket(util.OBJECTS) // The bucket holding got objects
+		current := info.Get(util.CURRENT)
 
 		// Create a commit object from the current directory snapshot
-		DebugLog("Taking snapshot of repo...")
-		hash := TakeSnapshot(tx.Bucket(OBJECTS), ".")
-		DebugLog("Repo snapshot has hash " + hash.String() + ".")
+		util.DebugLog("Taking snapshot of repo...")
+		hash := TakeSnapshot(tx.Bucket(util.OBJECTS), ".")
+		util.DebugLog("Repo snapshot has hash " + hash.String() + ".")
 
-		commit := CommitObject{
+		commit := types.CommitObject{
 			Author:  c.String("author"),
 			Message: c.String("message"),
 			Time:    time.Now(),
 			Tree:    hash,
-			Parents: make([]Hash, 0),
+			Parents: make([]types.Hash, 0),
 		}
 
 		// There is a 'current' commit, then it is the parent of the new commit
@@ -99,12 +101,12 @@ func Commit(c *cli.Context) {
 		}
 
 		commitBytes := commit.Serialize()
-		commitSha := CalculateHash(commitBytes)
+		commitSha := types.CalculateHash(commitBytes)
 		objects.Put(commitSha, commitBytes)
-		DebugLog("Created commit of sha " + commitSha.String() + ".")
+		util.DebugLog("Created commit of sha " + commitSha.String() + ".")
 
 		// CURRENT now corresponds to the commit that we just created
-		info.Put(CURRENT, commitSha)
+		info.Put(util.CURRENT, commitSha)
 
 		// TODO: Update heads
 

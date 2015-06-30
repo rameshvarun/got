@@ -7,14 +7,14 @@ got init # In an empty folder
 
 # Create an initial commit
 echo "Test File" > test.txt
-got commit
+got commit -m "Initial commit." -a "Nobody"
 
 # Modify the file
 echo "Test File Modified" > test.txt
-got commit
+got commit -m "Second commit." -a "Nobody"
 
-# Checkout the initial revision
-got checkout ...
+# See repository history
+got log
 ```
 
 ## Concepts
@@ -25,6 +25,8 @@ CURRENT - The current revision
 ## Commands
 ### got init
 ### got log
+Shows the commit history of the current repository, sorted by time. This command works by starting at the heads, then progressively traversing parent pointers.
+
 ### got commit -m "message" -a "author"
 ### got status
 ### got merge

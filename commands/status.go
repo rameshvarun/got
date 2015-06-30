@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"fmt"
@@ -8,32 +8,34 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/codegangsta/cli"
+	"github.com/rameshvarun/got/types"
+	"github.com/rameshvarun/got/util"
 )
 
 // Status implements the `got status` command.
 func Status(c *cli.Context) {
 	// Open the database
-	db := openDB()
+	db := util.OpenDB()
 	defer db.Close()
 
 	// Perform operations in a read-only lock
 	err := db.View(func(tx *bolt.Tx) error {
 		// Get the current commit sha
-		info := tx.Bucket(INFO)
-		objects := tx.Bucket(OBJECTS)
+		info := tx.Bucket(util.INFO)
+		objects := tx.Bucket(util.OBJECTS)
 
-		current := info.Get(CURRENT)
+		current := info.Get(util.CURRENT)
 
 		differences := []Difference{}
 		if current != nil {
 			// Load commit object
-			commit := DeserializeCommitObject(objects.Get(current))
-			DebugLog("Comparing working directory to commit '" + commit.Message + "'.")
+			commit := types.DeserializeCommitObject(objects.Get(current))
+			util.DebugLog("Comparing working directory to commit '" + commit.Message + "'.")
 			differences = TreeDiff(objects, commit.Tree, ".")
 		} else {
 			// Compare directory to the empty hash
-			DebugLog("Comparing working directory to empty tree.")
-			differences = TreeDiff(objects, EMPTY, ".")
+			util.DebugLog("Comparing working directory to empty tree.")
+			differences = TreeDiff(objects, types.EMPTY, ".")
 		}
 
 		// Print out the found differences
@@ -49,9 +51,15 @@ func Status(c *cli.Context) {
 	}
 }
 
+// Difference represents a modification between two directory trees.
+type Difference struct {
+	Type     string
+	FilePath string
+}
+
 // TreeDiff lists the differences between a Tree object in a snapshot
 // and a filesystem path.
-func TreeDiff(objects *bolt.Bucket, treeHash Hash, dir string) []Difference {
+func TreeDiff(objects *bolt.Bucket, treeHash types.Hash, dir string) []Difference {
 	differences := []Difference{}
 
 	files, err := ioutil.ReadDir(dir)
@@ -59,23 +67,24 @@ func TreeDiff(objects *bolt.Bucket, treeHash Hash, dir string) []Difference {
 		log.Fatalf("Could not list files in dir %s: %v", dir, err)
 	}
 	for _, file := range files {
-		if IgnorePath(file.Name()) {
+		if util.IgnorePath(file.Name()) {
 			continue
 		}
 
 		if file.IsDir() {
-			if treeHash.Equal(EMPTY) {
-				differences = append(differences, TreeDiff(objects, EMPTY, path.Join(dir, file.Name()))...)
+			if treeHash.Equal(types.EMPTY) {
+				differences = append(differences, TreeDiff(objects, types.EMPTY, path.Join(dir, file.Name()))...)
 			}
 		} else {
-			if treeHash.Equal(EMPTY) {
+			if treeHash.Equal(types.EMPTY) {
 				differences = append(differences, Difference{
 					Type:     "A",
 					FilePath: path.Join(dir, file.Name()),
 				})
 			} else {
-				treeObject := DeserializeTreeObject(objects.Get(treeHash))
-        if treeObject.HasFile(name string)
+				treeObject := types.DeserializeTreeObject(objects.Get(treeHash))
+				if treeObject.HasFile(file.Name()) {
+				}
 			}
 		}
 	}

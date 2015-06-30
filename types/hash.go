@@ -3,6 +3,7 @@ package types
 import (
 	"bytes"
 	"crypto/sha256"
+	"encoding/gob"
 	"encoding/hex"
 )
 
@@ -26,6 +27,30 @@ func CalculateHash(bytes []byte) Hash {
 
 // Represents the hash of an empty object
 var EMPTY Hash
+
+// SerializeHashes serializes a list of hashes
+func SerializeHashes(hashes []Hash) []byte {
+	buffer := new(bytes.Buffer)
+	e := gob.NewEncoder(buffer)
+	err := e.Encode(hashes)
+	if err != nil {
+		panic(err)
+	}
+	return buffer.Bytes()
+}
+
+// DeserializeHashes deserializes a list of hashes
+func DeserializeHashes(input []byte) []Hash {
+	buffer := bytes.NewBuffer(input)
+	dec := gob.NewDecoder(buffer)
+
+	var hashes []Hash
+	err := dec.Decode(&hashes)
+	if err != nil {
+		panic(err)
+	}
+	return hashes
+}
 
 func init() {
 	EMPTY = CalculateHash([]byte{})

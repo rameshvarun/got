@@ -1,10 +1,12 @@
 package commands
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
+	"strconv"
 	"time"
 
 	"github.com/boltdb/bolt"
@@ -108,7 +110,28 @@ func Commit(c *cli.Context) {
 		// CURRENT now corresponds to the commit that we just created
 		info.Put(util.CURRENT, commitSha)
 
-		// TODO: Update heads
+		// Update heads
+		headsBytes := info.Get(util.HEADS)
+		if headsBytes != nil {
+			heads := types.DeserializeHashes(headsBytes)
+			util.DebugLog("Currently " + strconv.Itoa(len(heads)) + " heads in this repo...")
+
+			// Remove current, if it is a head
+			for i, head := range heads {
+				if head.Equal(current) {
+					heads = append(heads[:i], heads[i+1:]...)
+					break
+				}
+			}
+
+			// Add the new commit as a head
+			heads = append(heads, commitSha)
+
+			info.Put(util.HEADS, types.SerializeHashes(heads))
+		} else {
+			util.DebugLog("Currently no heads in this repo. Putting HEADS: " + fmt.Sprint(([]types.Hash{commitSha})))
+			info.Put(util.HEADS, types.SerializeHashes([]types.Hash{commitSha}))
+		}
 
 		return nil
 	})

@@ -1,4 +1,4 @@
-# Got
+# Got [![Build Status](https://travis-ci.org/rameshvarun/got.svg)](https://travis-ci.org/rameshvarun/got)
 A VCS written in Go, made for practice.
 
 ## Example Usage

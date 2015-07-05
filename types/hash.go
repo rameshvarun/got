@@ -2,7 +2,7 @@ package types
 
 import (
 	"bytes"
-	"crypto/sha256"
+	"crypto/sha1"
 	"encoding/gob"
 	"encoding/hex"
 )
@@ -21,8 +21,8 @@ func (hash Hash) Equal(other Hash) bool {
 
 // CalculateHash calculates the hash of a byte slice
 func CalculateHash(bytes []byte) Hash {
-	hash := sha256.Sum256(bytes)
-	return hash[0:32]
+	hash := sha1.Sum(bytes)
+	return hash[0:20]
 }
 
 // Represents the hash of an empty object

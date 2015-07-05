@@ -8,6 +8,7 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/codegangsta/cli"
+	"github.com/mgutz/ansi"
 	"github.com/rameshvarun/got/types"
 	"github.com/rameshvarun/got/util"
 )
@@ -17,6 +18,10 @@ func Status(c *cli.Context) {
 	// Open the database
 	db := util.OpenDB()
 	defer db.Close()
+
+	yellow := ansi.ColorFunc("yellow+h:black")
+	green := ansi.ColorFunc("green+h:black")
+	red := ansi.ColorFunc("red+h:black")
 
 	// Perform operations in a read-only lock
 	err := db.View(func(tx *bolt.Tx) error {
@@ -40,7 +45,16 @@ func Status(c *cli.Context) {
 
 		// Print out the found differences
 		for _, difference := range differences {
-			fmt.Printf("%s %s\n", difference.Type, difference.FilePath)
+			line := fmt.Sprintf("%s %s", difference.Type, difference.FilePath)
+			if difference.Type == "A" {
+				fmt.Println(green(line))
+			}
+			if difference.Type == "R" {
+				fmt.Println(red(line))
+			}
+			if difference.Type == "M" {
+				fmt.Println(yellow(line))
+			}
 		}
 
 		return nil

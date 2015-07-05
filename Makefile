@@ -11,3 +11,4 @@ test:
 
 clean:
 	rm ${GOPATH}/bin/got
+	find . -name "*~" -type f -delete

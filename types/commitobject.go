@@ -22,7 +22,7 @@ type CommitObject struct {
 }
 
 // Serialize creates a representation of the current CommitObject.
-func (commit CommitObject) Serialize() []byte {
+func (commit *CommitObject) Serialize() []byte {
 	buffer := new(bytes.Buffer)
 	e := gob.NewEncoder(buffer)
 	err := e.Encode(commit)
@@ -34,7 +34,7 @@ func (commit CommitObject) Serialize() []byte {
 
 // DeserializeCommitObject returns a commit object deserialized from the given
 // byte stream
-func DeserializeCommitObject(input []byte) CommitObject {
+func DeserializeCommitObject(input []byte) *CommitObject {
 	buffer := bytes.NewBuffer(input)
 	dec := gob.NewDecoder(buffer)
 
@@ -43,5 +43,5 @@ func DeserializeCommitObject(input []byte) CommitObject {
 	if err != nil {
 		panic(err)
 	}
-	return commit
+	return &commit
 }

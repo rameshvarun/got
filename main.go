@@ -74,12 +74,9 @@ func main() {
 			},
 		},
 		{
-			Name:  "revert",
-			Usage: "Revert a file to the last commit.",
-			Action: func(c *cli.Context) {
-				db := util.OpenDB()
-				defer db.Close()
-			},
+			Name:   "revert",
+			Usage:  "Revert a file to the last commit.",
+			Action: commands.Revert,
 		},
 	}
 

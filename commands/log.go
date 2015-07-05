@@ -6,6 +6,7 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/codegangsta/cli"
+	"github.com/mgutz/ansi"
 	"github.com/rameshvarun/got/types"
 	"github.com/rameshvarun/got/util"
 )
@@ -13,6 +14,8 @@ import (
 func Log(c *cli.Context) {
 	db := util.OpenDB()
 	defer db.Close()
+
+	yellow := ansi.ColorFunc("yellow+h:black")
 
 	// Perform operations in a read-only lock
 	db.View(func(tx *bolt.Tx) error {
@@ -33,11 +36,16 @@ func Log(c *cli.Context) {
 				commit := types.DeserializeCommitObject(objects.Get(commitSha))
 				queue = append(queue[:i], queue[i+1:]...)
 
-				fmt.Printf("commit %s\n", commitSha)
+				fmt.Printf(yellow("commit %s\n"), commitSha)
 				fmt.Printf("Message: %s\n", commit.Message)
 				fmt.Printf("Author: %s\n", commit.Author)
 				fmt.Printf("Date: %s\n", commit.Time)
-				fmt.Printf("Parents: %s\n", commit.Parents)
+
+				if len(commit.Parents) > 0 {
+					fmt.Printf("Parents: %s\n", commit.Parents)
+				}
+
+				fmt.Printf("Tree: %s\n", commit.Tree)
 				fmt.Println()
 
 				// Append parents of this commit to the queue

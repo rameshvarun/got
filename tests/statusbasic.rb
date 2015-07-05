@@ -11,7 +11,6 @@ Dir.chdir(dir)
 
 File.write('file1.txt', 'First file')
 File.write('file2.txt', 'Second file')
-
 result = `got status`
 
 if result != expected

@@ -88,6 +88,13 @@ func TreeDiff(objects *bolt.Bucket, treeHash types.Hash, dir string) []Differenc
 		if file.IsDir() {
 			if treeHash.Equal(types.EMPTY) {
 				differences = append(differences, TreeDiff(objects, types.EMPTY, path.Join(dir, file.Name()))...)
+			} else {
+				treeObject := types.DeserializeTreeObject(objects.Get(treeHash))
+				if treeObject.HasFile(file.Name()) {
+					differences = append(differences, TreeDiff(objects, treeObject.GetFile(file.Name()), path.Join(dir, file.Name()))...)
+				} else {
+					differences = append(differences, TreeDiff(objects, types.EMPTY, path.Join(dir, file.Name()))...)
+				}
 			}
 		} else {
 			if treeHash.Equal(types.EMPTY) {
@@ -98,6 +105,21 @@ func TreeDiff(objects *bolt.Bucket, treeHash types.Hash, dir string) []Differenc
 			} else {
 				treeObject := types.DeserializeTreeObject(objects.Get(treeHash))
 				if treeObject.HasFile(file.Name()) {
+					fileBytes, err := ioutil.ReadFile(path.Join(dir, file.Name()))
+					if err != nil {
+						panic(err)
+					}
+					if !types.CalculateHash(fileBytes).Equal(treeObject.GetFile(file.Name())) {
+						differences = append(differences, Difference{
+							Type:     "M",
+							FilePath: path.Join(dir, file.Name()),
+						})
+					}
+				} else {
+					differences = append(differences, Difference{
+						Type:     "A",
+						FilePath: path.Join(dir, file.Name()),
+					})
 				}
 			}
 		}

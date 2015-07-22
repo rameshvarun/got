@@ -6,7 +6,7 @@ default: ${GOPATH}/bin/got
 ${GOPATH}/bin/got: $(shell find . -type f -and -name '*.go')
 	go install
 
-test:
+test: default
 	./runtests.sh
 
 clean:

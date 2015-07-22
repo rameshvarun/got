@@ -39,7 +39,7 @@ func TakeSnapshot(b *bolt.Bucket, filePath string) types.Hash {
 
 			// Snapshot the file, and add it to the current tree object
 			hash := TakeSnapshot(b, path.Join(filePath, file.Name()))
-			treeObject.AddFile(file.Name(), hash)
+			treeObject.AddFile(file.Name(), hash, file.IsDir())
 		}
 
 		// Calculate hash of the directory

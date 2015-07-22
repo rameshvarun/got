@@ -13,8 +13,9 @@ type TreeObject struct {
 
 // DirectoryEntry represents one entry in a TreeObject
 type DirectoryEntry struct {
-	Name string
-	Hash Hash
+	IsDir bool
+	Name  string
+	Hash  Hash
 }
 
 // ByFileName implements sort.Interface for []Person based on
@@ -33,10 +34,11 @@ func NewTreeObject() *TreeObject {
 }
 
 // AddFile adds a file to the given TreeObject
-func (tree *TreeObject) AddFile(name string, hash Hash) {
+func (tree *TreeObject) AddFile(name string, hash Hash, isDir bool) {
 	tree.Files = append(tree.Files, DirectoryEntry{
-		Name: name,
-		Hash: hash,
+		IsDir: isDir,
+		Name:  name,
+		Hash:  hash,
 	})
 	sort.Sort(ByFileName(tree.Files))
 }

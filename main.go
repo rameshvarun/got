@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"github.com/boltdb/bolt"
-	"github.com/codegangsta/cli"
 	"github.com/rameshvarun/got/commands"
 	"github.com/rameshvarun/got/util"
+	"github.com/urfave/cli"
 )
 
 // Application entry point

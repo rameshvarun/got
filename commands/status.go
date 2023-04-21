@@ -8,10 +8,10 @@ import (
 	"path"
 
 	"github.com/boltdb/bolt"
-	"github.com/codegangsta/cli"
 	"github.com/mgutz/ansi"
 	"github.com/rameshvarun/got/types"
 	"github.com/rameshvarun/got/util"
+	"github.com/urfave/cli"
 )
 
 // Status implements the `got status` command.

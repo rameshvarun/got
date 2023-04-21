@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/boltdb/bolt"
-	"github.com/codegangsta/cli"
 	"github.com/rameshvarun/got/types"
 	"github.com/rameshvarun/got/util"
+	"github.com/urfave/cli"
 )
 
 // TakeSnapshot recursivelly snapshots the current directory.

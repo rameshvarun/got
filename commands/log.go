@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/boltdb/bolt"
-	"github.com/codegangsta/cli"
 	"github.com/mgutz/ansi"
 	"github.com/rameshvarun/got/types"
 	"github.com/rameshvarun/got/util"
+	"github.com/urfave/cli"
 )
 
 func Log(c *cli.Context) {

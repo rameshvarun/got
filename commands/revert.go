@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/boltdb/bolt"
-	"github.com/codegangsta/cli"
 	"github.com/rameshvarun/got/types"
 	"github.com/rameshvarun/got/util"
+	"github.com/urfave/cli"
 )
 
 // TreeLookup gets the contents of a certain file path in the given tree

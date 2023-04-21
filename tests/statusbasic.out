@@ -1,4 +1,4 @@
 Comparing working directory to commit 'Test Message'.
-[93;40mM file2.txt[0m
-[92;40mA file3.txt[0m
-[91;40mR file1.txt[0m
+[0;93;40mM file2.txt[0m
+[0;92;40mA file3.txt[0m
+[0;91;40mR file1.txt[0m

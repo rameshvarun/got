@@ -1,14 +1,11 @@
 
-.PHONY: default test clean
+.PHONY: install test clean
 
-default: ${GOPATH}/bin/got
-
-${GOPATH}/bin/got: $(shell find . -type f -and -name '*.go')
+install: $(shell find . -type f -and -name '*.go')
 	go install
 
-test: default
+test: install
 	./runtests.sh
 
 clean:
-	rm ${GOPATH}/bin/got
 	find . -name "*~" -type f -delete

@@ -2,7 +2,8 @@
 
 require 'tmpdir'
 
-expected = IO.read(File.join(File.dirname(__FILE__), "statusbasic.out"))
+expected_path = File.expand_path(File.join(File.dirname(__FILE__), "statusbasic.out"))
+expected = IO.read(expected_path)
 
 dir = Dir.mktmpdir
 Dir.chdir(dir)

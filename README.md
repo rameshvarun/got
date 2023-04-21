@@ -1,4 +1,5 @@
-# Got [![Build Status](https://travis-ci.org/rameshvarun/got.svg)](https://travis-ci.org/rameshvarun/got)
+# Got
+[![Go](https://github.com/rameshvarun/got/actions/workflows/go.yml/badge.svg)](https://github.com/rameshvarun/got/actions/workflows/go.yml)
 A VCS written in Go, made for practice.
 
 ## Example Usage
